@@ -11,8 +11,13 @@
     <hr>
 </header>
 
-<?php
 
+<?php
+require_once "settings.php"
+?>
+
+
+<?php
 session_start();
 
 if (isset($_SESSION['user'])) {
@@ -20,8 +25,8 @@ if (isset($_SESSION['user'])) {
 } else {
     header('Location: login.php');
 }
-
 ?>
+
 
 <footer>
     <p>&copy; 2025 My Website. All rights reserved.</p>
