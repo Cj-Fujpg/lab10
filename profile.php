@@ -12,7 +12,7 @@
 </header>
 
 <?php
-include 'header.inc';
+
 session_start();
 
 if (isset($_SESSION['user'])) {
@@ -20,7 +20,7 @@ if (isset($_SESSION['user'])) {
 } else {
     header('Location: login.php');
 }
-include 'footer.inc';
+
 ?>
 
 <footer>
