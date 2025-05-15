@@ -5,9 +5,9 @@ $password = $_POST['password'];
 
 if($username=='Cj'&& $password == '105927887') {
     $_SESSION['user'] = $username;
-    header('Location: welcome.php');
+    header('Location: profile.php');
 } else {
-    echo "Invalid login. <a href='login.html'>Try again</a>";
+    echo "Invalid login. <a href='login.php'>Try again</a>";
 }
 ?>
 
@@ -16,7 +16,7 @@ if($username=='Cj'&& $password == '105927887') {
 
     </head>
 <body>
-<form method="post" action="process.php">
+<form method="post" action="profile.php">
     <label for="username">Username:</label>
     <input type="text" name="username" required><br>
 
