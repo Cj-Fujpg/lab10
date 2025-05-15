@@ -15,12 +15,12 @@ if (!$conn){
         if($user = mysqli_fetch_assoc($result)){
             $_SESSION['username'] = $user['username'];
         if($user['username'] == 'Cj'){
-            header('Location:profile.php')
+            header('Location:profile.php');
             exit;
-        }else{
-            $_SESSION['error'] = "Invalid username or password. Please try again."
-            header('Location:login.php');
-            exit;
+    }else{
+        $_SESSION['error'] = "Invalid username or password. Please try again."
+        header('Location:login.php');
+        exit;
         }
     }
 }
