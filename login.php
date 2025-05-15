@@ -1,22 +1,10 @@
-<?php
-session_start();
-$username = $_POST['username'];
-$password = $_POST['password'];
-
-if($username=='Cj'&& $password == '105927887') {
-    $_SESSION['user'] = $username;
-    header('Location: profile.php');
-} else {
-    echo "Invalid login. <a href='login.php'>Try again</a>";
-}
-?>
-
+<!DOCTYPE html>
 <html>
     <head>
 
     </head>
 <body>
-<form method="post" action="profile.php">
+<form method="post" action="process.php">
     <label for="username">Username:</label>
     <input type="text" name="username" required><br>
 
