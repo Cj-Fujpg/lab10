@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db_connection.php'; // Assuming you have a database connection file
+require_once 'settings.php'; // Assuming you have a database connection file
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);

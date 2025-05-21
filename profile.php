@@ -7,7 +7,7 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-require_once 'db_connection.php';
+require_once 'settings.php';
 
 // Fetch user data
 $username = $_SESSION['username'];
