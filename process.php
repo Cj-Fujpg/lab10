@@ -1,44 +1,104 @@
 <?php
 session_start();
-require_once("settings.php");
+require_once 'db_connection.php';
 
-$conn = mysqli_connect($host, $username, $password, $database);
-if (!$conn) {
-    die("Database connection failed: " . mysqli_connect_error());
+// Check if form was submitted
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: login.php');
+    exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $input_username = trim($_POST['username']);
-    $input_password = trim($_POST['password']);
+// Get action parameter
+$action = $_POST['action'] ?? '';
+
+switch ($action) {
+    case 'login':
+        handleLogin();
+        break;
+    case 'update_profile':
+        handleProfileUpdate();
+        break;
+    default:
+        // Invalid action
+        header('Location: login.php');
+        exit();
+}
+
+function handleLogin() {
+    global $conn;
     
-    $table_check = mysqli_query($conn, "SHOW TABLES LIKE 'user'");
-    if (mysqli_num_rows($table_check) == 0) {
-        die("Error: The 'user' table doesn't exist in database '$database'");
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
+    
+    // Validate inputs
+    if (empty($username) || empty($password)) {
+        redirectWithError('Username and password are required');
     }
-
-    $query = "SELECT * FROM user WHERE username = '$input_username'";
-    $result = mysqli_query($conn, $query);
-
-    if (!$result) {
-        die("Query failed: " . mysqli_error($conn));
-    }
-
-    if (mysqli_num_rows($result) == 1) {
-        $user = mysqli_fetch_assoc($result);
+    
+    // Prepare SQL statement to prevent SQL injection
+    $stmt = $conn->prepare("SELECT username, password FROM user WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 1) {
+        $user = $result->fetch_assoc();
         
-        if ($input_password === $user['password']) {
+        // Verify password (in real app, use password_verify() with hashed passwords)
+        if ($password === $user['password']) {
             $_SESSION['username'] = $user['username'];
-            $_SESSION['email'] = $user['email'];
             header('Location: profile.php');
-            exit;
+            exit();
         }
     }
     
-    $_SESSION['error'] = "Invalid username or password";
-    header('Location: login.php');
-    exit;
+    // If we get here, login failed
+    redirectWithError('Invalid username or password');
 }
 
-header('Location: login.php');
-exit;
-?>
+function handleProfileUpdate() {
+    global $conn;
+    
+    // Check if user is logged in
+    if (!isset($_SESSION['username'])) {
+        header('Location: login.php');
+        exit();
+    }
+    
+    $username = $_POST['username'];
+    $new_email = trim($_POST['email']);
+    
+    // Validate inputs
+    if (empty($new_email) || !filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
+        redirectToProfile('0', 'Invalid email address');
+    }
+    
+    // Verify the logged in user matches the profile being edited
+    if ($username !== $_SESSION['username']) {
+        redirectToProfile('0', 'Unauthorized action');
+    }
+    
+    // Update the email in database
+    $stmt = $conn->prepare("UPDATE user SET email = ? WHERE username = ?");
+    $stmt->bind_param("ss", $new_email, $username);
+    
+    if ($stmt->execute()) {
+        redirectToProfile('1', 'Profile updated successfully');
+    } else {
+        redirectToProfile('0', 'Failed to update profile');
+    }
+}
+
+function redirectWithError($error) {
+    header('Location: login.php?error=' . urlencode($error));
+    exit();
+}
+
+function redirectToProfile($success, $message = '') {
+    $location = 'profile.php?success=' . $success;
+    if (!empty($message)) {
+        $location .= '&message=' . urlencode($message);
+    }
+    header('Location: ' . $location);
+    exit();
+}

@@ -4,9 +4,8 @@ $username = "root";
 $password = "";
 $database = "users"; 
 
-$dbconn = mysqli_connect($host, $username, $password, $database);
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-if (!$dbconn) {
-    die("Connection failed: " . mysqli_connect_error());
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
-?>
