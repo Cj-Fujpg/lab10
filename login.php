@@ -1,42 +1,57 @@
 <?php
+require_once 'settings.php';
 session_start();
-require_once 'settings.php'; // Assuming you have a database connection file
+
+// Redirect to profile if already logged in
+if (isset($_SESSION['username'])) {
+    header('Location: profile.php');
+    exit();
+}
+
+// Get the database connection
+$conn = getDBConnection();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
     
-    // Prepare SQL statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT username, password FROM user WHERE username = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows === 1) {
-        $user = $result->fetch_assoc();
+    // Validate inputs
+    if (empty($username) || empty($password)) {
+        $error = "Username and password are required";
+    } else {
+        // Prepare SQL statement
+        $stmt = $conn->prepare("SELECT username, password FROM user WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
         
-        // Verify password (in a real app, you'd use password_verify() with hashed passwords)
-        if ($password === $user['password']) {
-            $_SESSION['username'] = $user['username'];
-            header('Location: profile.php');
-            exit();
+        if ($result->num_rows === 1) {
+            $user = $result->fetch_assoc();
+            
+            // Verify password (in real app, use password_verify() with hashed passwords)
+            if ($password === $user['password']) {
+                $_SESSION['username'] = $user['username'];
+                header('Location: profile.php');
+                exit();
+            }
         }
+        
+        $error = "Invalid username or password";
     }
-    
-    // If we get here, login failed
-    $error = "Invalid username or password";
 }
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <title>Login - <?php echo APP_NAME; ?></title>
 </head>
 <body>
     <h1>Login</h1>
-    <?php if (isset($error)) echo "<p style='color:red'>$error</p>"; ?>
-    <form method="post">
+    <?php if (isset($error)): ?>
+        <p style="color:red"><?php echo htmlspecialchars($error); ?></p>
+    <?php endif; ?>
+    <form method="post" action="login.php">
         <label>Username:</label>
         <input type="text" name="username" required><br>
         
