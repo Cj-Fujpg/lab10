@@ -27,4 +27,4 @@ if (isset($_SESSION['user'])) {
     <p>&copy; 2025 My Website. All rights reserved.</p>
 </footer>
 </body>
-</html>
+</html> 
