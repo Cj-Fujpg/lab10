@@ -14,7 +14,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
 
     if($user = mysqli_fetch_assoc($result)){
         $_SESSION['username'] = $user['username'];
-        if($user['username'] == 'Cj'){
+        if($user['username'] == 'Placeholder'){
             header('Location:profile.php');
             exit;
         }
