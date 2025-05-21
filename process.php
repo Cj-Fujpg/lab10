@@ -1,26 +1,42 @@
 <?php
 session_start();
-if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
-    exit();
-}
+require_once("settings.php");
+
+$conn = mysqli_connect($host, $username, $password, $database);
+if (!$conn) {
+    die("Database connection failed: " . mysqli_connect_error());
+    }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $conn = new mysqli("localhost", "root", "", "web_lab");
-
-    $username = $_SESSION['username'];
-    $new_email = $_POST['email'];
-
-    $stmt = $conn->prepare("UPDATE user SET email=? WHERE username=?");
-    $stmt->bind_param("ss", $new_email, $username);
-    if ($stmt->execute()) {
-        // Update successful, redirect to profile
-        header("Location: profile.php");
-        exit();
-    } else {
-        echo "Error updating record.";
+    $input_username = trim($_POST['username']);
+    $input_password = trim($_POST['password']);
+    
+    $table_check = mysqli_query($conn, "SHOW TABLES LIKE 'user'");
+    if (mysqli_num_rows($table_check) == 0) {
+        die("Error: The 'user' table doesn't exist in database '$database'");
     }
-} else {
-    header("Location: settings.php");
-    exit();
+
+    $query = "SELECT * FROM user WHERE username = '$input_username'";
+    $result = mysqli_query($conn, $query);
+
+    if (!$result) {
+        die("Query failed: " . mysqli_error($conn));
+    }
+
+    if (mysqli_num_rows($result) == 1) {
+        $user = mysqli_fetch_assoc($result);
+        
+        if ($input_password === $user['password']) {
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['email'] = $user['email'];
+            header('Location: profile.php');
+            exit;
+        }
+    }
+        $_SESSION['error'] = "Invalid username or password";
+    header('Location: login.php');
+    exit;
 }
+header('Location: login.php');
+exit;
+?>
