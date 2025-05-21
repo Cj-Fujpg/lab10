@@ -17,11 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    $query = "SELECT username, password, email FROM user WHERE username = '$input_username'";
+    $query = "SELECT username, password, email FROM users WHERE username = '$input_username'";
     $result = mysqli_query($conn, $query);
 
     if (!$result) {
-        $_SESSION['error'] = "Database error occurred";
+        $_SESSION['error'] = "Database error occurred: " . mysqli_error($conn);
         header('Location: login.php');
         exit;
     }
