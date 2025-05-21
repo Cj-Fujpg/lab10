@@ -1,35 +1,17 @@
 <?php
 session_start();
-
-// Check if user is logged in
 if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
+    header("Location: login.php");
     exit();
 }
 
-require_once 'settings.php';
+$conn = new mysqli("localhost", "root", "", "web_lab");
+$username = $_SESSION['username'];
+$new_email = $_POST['email'];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'];
-    $new_email = trim($_POST['email']);
-    
-    // Verify the logged in user matches the profile being edited
-    if ($username !== $_SESSION['username']) {
-        header('Location: profile.php?success=0');
-        exit();
-    }
-    
-    // Update the email in database
-    $stmt = $conn->prepare("UPDATE user SET email = ? WHERE username = ?");
-    $stmt->bind_param("ss", $new_email, $username);
-    
-    if ($stmt->execute()) {
-        header('Location: profile.php?success=1');
-    } else {
-        header('Location: profile.php?success=0');
-    }
-    exit();
-}
+$stmt = $conn->prepare("UPDATE user SET email=? WHERE username=?");
+$stmt->bind_param("ss", $new_email, $username);
+$stmt->execute();
 
-// If not a POST request, redirect to profile
-header('Location: profile.php');
+header("Location: profile.php");
+exit();
